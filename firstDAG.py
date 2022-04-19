@@ -5,3 +5,4 @@
 # Model 3  /                                                      \  inaccurate
 #
 
+from airflow import DAG
