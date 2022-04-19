@@ -15,8 +15,10 @@ def _training_model():
     return randint(1,10)
 
 from airflow.operators.bash import BashOperator
-def _choose_best_model():
-    if (best_accuray>8): # How to pass the accuracy from the training model to best_accuray accuracy ? Need to share the data from training_model_X tasks into choose_best_model task. Using xcom
+def _choose_best_model(ti): #use task instance objec to fetch the data from the db
+    accuracies=ti.xcom_pull(task_ids=['training_model_A','training_model_B','training_model_C'])
+    best_accuracy=max(accuracies)
+    if (best_accuracy>8): # How to pass the accuracy from the training model to best_accuray accuracy ? Need to share the data from training_model_X tasks into choose_best_model task. Using xcom
         return 'accurate' # the task_id
     return 'inaccurate' # the task_id
 
@@ -58,3 +60,5 @@ schedule_interval="@daily",catchup=False) as dag:
         task_id="inaccurate",
         bash_command="echo 'inaccurate'"
     )
+
+[training_model_A,training_model_B,training_model_C]>>choose_best_model>>[accurate,inaccurate]
